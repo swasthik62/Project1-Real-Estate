@@ -39,7 +39,7 @@ After importing the dataset we need to understand the Missing values and NA's
 ![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/dda774ec-aa18-47b1-b802-a049e8dcdb05)
 
 
-```colSums(is.na(hs_test))``` #We have get the data of NA values accumulated in Test data
+```colSums(is.na(hs_train))``` #We have get the data of NA values accumulated in Train data
 
 ![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/6aa6e4ae-28c2-41ce-b515-5d7b982e2267)
 
@@ -53,7 +53,9 @@ We can also plot the Tables of NAs using the ```vis_dat``` function.
 
 ![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/232c391a-acb6-439f-ad52-57fee10ae8bc)
 
-As per the variable analysis i have found some inputs and applied it on the dataset.
+There are many missing values and we need to convert some Variables into Numerical values, And We need to create Dummies for certain Variables.
+
+As per the Variable Analysis i have found some inputs and applied it on the dataset.
 
 ```
 #Suburb :  drop the variable as this has no correlation.
@@ -73,9 +75,24 @@ As per the variable analysis i have found some inputs and applied it on the data
 #YearBuilt : drop the variable as this has no correlation.
 #CouncilArea : create dummies then convert to numeric.
 ```
+
+### Data Cleaning Process: 
+
 Im doing some data cleansing procedure using recipe functions
 
+Aim :
+1. To remove the unwanted variables
+2. Convert the Variables into Numeric/Charecter/Factor.
+3. To create dummies
+4. To handle the missing values followed by Mean, Median, mode etc.
+
 ```
+#converting target var as numeric
+hs_train$Price=as.numeric(hs_train$Price)
+```
+
+```
+library(tidymodels) #here i imported the library called tidymodels
 dp_pipe=recipe(Price ~ .,data=hs_train) %>% 
   update_role(Suburb,Address,SellerG,Postcode,YearBuilt,new_role = "drop_vars") %>% 
   update_role(Rooms,Landsize,
@@ -96,9 +113,66 @@ dp_pipe=prep(dp_pipe)
 hs_train=bake(dp_pipe,new_data = hs_train)
 hs_test=bake(dp_pipe,new_data = hs_test)
 ```
+After the recipe funtion there will be no Na or missing values and also there will additional variables were added due to the Create Dummy funtion. Lets check the dataset.
 
+again im running the is.na querry to check the NA's
 
+``` colSums(is.na(hs_train))#We have get the data of NA values accumulated in Test data ```
 
+![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/0f456b7c-d291-4cf1-81b3-65b33d403ef0)
+
+``` vis_dat(hs_train) # to plot the train dataset ``` 
+
+![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/4c5f6a24-daaa-4922-9969-c27325f1b87a)
+
+We can see there is no missing values, all the Variables are converted into  numerical values and Dummies are created.
+
+### Splitting the Dataset
+Split the `hs_train` dataset into two `trn` and `tst` to check the model performance.
+
+```
+set.seed(2) #using this function system cannot ablter any rows throughout the process.
+s=sample(1:nrow(hs_train),0.8*nrow(hs_train)) #we are spliting the data into 80% and 20%
+trn=hs_train[s,]
+tst=hs_train[-s,]
+```
+
+One the Dataset has been splitted we can check the performance of dataset using Different Models.
+
+### Implement and Check with the different models
+
+We are imposing various models to check the performance of the Dataset.
+
+#### Linear Model:
+
+```
+fit = lm(Price~.,data=trn)
+```
+
+Once we run the Model we need to check the model performance using Root Mean Squared Error(RMSE) and Mean Absolute Error (MAE)of Both `tst` and `trn` dataset.
+
+#### Checking the RMSE and MAE of `tst` datset
+
+```
+test.pred=predict(fit,newdata = tst)
+
+errors=tst$Price-test.pred
+
+rmse = (errors)**2 %>% mean() %>% sqrt() #431630.9
+
+mae=mean(abs(errors)) #277454.6
+```
+#### Checking the RMSE and MAE of `trn` datset
+
+```
+train.pred=predict(fit,newdata = trn)
+
+errors=trn$Price-train.pred
+
+rmse = (errors)**2 %>% mean() %>% sqrt() #417847.7
+
+mae=mean(abs(errors)) #283665.2
+```
 
 
 
