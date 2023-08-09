@@ -30,10 +30,12 @@ After importing the Dataset we should understand the Dataset so that we can iden
 
 ![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/591ab987-7a99-4a55-97d7-67e8acd9f6bd)
 
-```colSums(is.na(hs_test)) #We have get the data of NA values accumulated in Test data
+```colSums(is.na(hs_test))``` #We have get the data of NA values accumulated in Test data
+
 ![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/6aa6e4ae-28c2-41ce-b515-5d7b982e2267)
 
 As per the variable analysis i have found some inputs and applied it on the dataset.
+
 ```
 #Suburb :  drop the variable as this has no correlation.
 #Address : drop the variable as this has no correlation.
