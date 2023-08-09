@@ -30,9 +30,28 @@ After importing the Dataset we should understand the Dataset so that we can iden
 
 ![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/591ab987-7a99-4a55-97d7-67e8acd9f6bd)
 
+### Deal with NA values
+
+After importing the dataset we need to understand the Missing values and NA's 
+
+``` colSums(is.na(hs_test))#We have get the data of NA values accumulated in Test data ```
+
+![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/dda774ec-aa18-47b1-b802-a049e8dcdb05)
+
+
 ```colSums(is.na(hs_test))``` #We have get the data of NA values accumulated in Test data
 
 ![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/6aa6e4ae-28c2-41ce-b515-5d7b982e2267)
+
+We can also plot the Tables of NAs using the ```vis_dat``` function.
+
+``` vis_dat(hs_train) # to plot the train dataset ```
+
+![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/f2d27be6-11d6-443c-aa2c-dd5964fe0108)
+
+``` vis_dat(hs_test) # to plot the test dataset ```
+
+![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/232c391a-acb6-439f-ad52-57fee10ae8bc)
 
 As per the variable analysis i have found some inputs and applied it on the dataset.
 
