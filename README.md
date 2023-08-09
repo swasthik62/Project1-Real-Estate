@@ -30,12 +30,33 @@ After importing the Dataset we should understand the Dataset so that we can iden
 
 ![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/591ab987-7a99-4a55-97d7-67e8acd9f6bd)
 
-```colSums(is.na(hs_test)) #We have get the data of NA values accumulated in Test data
+### Deal with NA values
+
+After importing the dataset we need to understand the Missing values and NA's 
+
+``` colSums(is.na(hs_test))#We have get the data of NA values accumulated in Test data ```
+
+![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/dda774ec-aa18-47b1-b802-a049e8dcdb05)
+
+
+```colSums(is.na(hs_test))``` #We have get the data of NA values accumulated in Test data
+
 ![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/6aa6e4ae-28c2-41ce-b515-5d7b982e2267)
 
+We can also plot the Tables of NAs using the ```vis_dat``` function.
+
+``` vis_dat(hs_train) # to plot the train dataset ```
+
+![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/f2d27be6-11d6-443c-aa2c-dd5964fe0108)
+
+``` vis_dat(hs_test) # to plot the test dataset ```
+
+![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/232c391a-acb6-439f-ad52-57fee10ae8bc)
+
+
 As per the variable analysis i have found some inputs and applied it on the dataset.
-```
-#Suburb :  drop the variable as this has no correlation.
+
+```#Suburb :  drop the variable as this has no correlation.
 #Address : drop the variable as this has no correlation.
 #Rooms : club low frequency cateorories and then create dummies then conver to numeric.
 #Type : create dummies then convert to numeric.
@@ -50,12 +71,14 @@ As per the variable analysis i have found some inputs and applied it on the data
 #Landsize : convert numeric :: convert to numeric.
 #BuildingArea : convert to numeric.
 #YearBuilt : drop the variable as this has no correlation.
-#CouncilArea : create dummies then convert to numeric.
+#CouncilArea : create dummies then convert to numeric
 ```
+
+
 Im doing some data cleansing procedure using recipe functions
 
-```
-dp_pipe=recipe(Price ~ .,data=hs_train) %>% 
+
+``` dp_pipe=recipe(Price ~ .,data=hs_train) %>% 
   update_role(Suburb,Address,SellerG,Postcode,YearBuilt,new_role = "drop_vars") %>% 
   update_role(Rooms,Landsize,
               Bedroom2,Car,BuildingArea,CouncilArea,
@@ -68,12 +91,16 @@ dp_pipe=recipe(Price ~ .,data=hs_train) %>%
   step_mutate_at(has_role("to_numeric"),fn=as.numeric) %>% 
   step_impute_median(all_numeric(),-all_outcomes())
 ```
-Once the ```dp_pipe``` is created we need to ```prep``` and ```bake``` the dp_pipe in the next step
+
+Once the  ` dp_pipe `  is created we need to  `prep` and `bake`  the dp_pipe in the next step.
+
 
 ```
-dp_pipe=prep(dp_pipe)
+dp_pipe=prep(dp_pipe) 
+
 hs_train=bake(dp_pipe,new_data = hs_train)
-hs_test=bake(dp_pipe,new_data = hs_test)
+
+hs_test=bake(dp_pipe,new_data = hs_test) 
 ```
 
 
