@@ -173,7 +173,43 @@ rmse = (errors)**2 %>% mean() %>% sqrt() #417847.7
 
 mae=mean(abs(errors)) #283665.2
 ```
+If we take the difference of `tst` and `trn` it would be 3.2451%.
 
+#### Gradient Boosting Machine
+
+```
+gbm.fit=gbm(Price~.-Type_X__other__,
+            data=trn,
+            distribution = "gaussian", #if it is classification logistic
+            n.trees = 400,
+            shrinkage = 0.01,
+            bag.fraction = 0.8,
+            interaction.depth = 5) 
+
+help("gbm")
+```
+#### Checking the RMSE and MAE of `tst` datset
+
+```
+test.predicted.gbm=predict.gbm(gbm.fit,newdata=tst)
+
+errors=test.predicted.gbm-tst$Price
+
+rmse = (errors)**2 %>% mean() %>% sqrt() #412138.1
+
+mae=mean(abs(errors)) #260450.3
+```
+#### Checking the RMSE and MAE of `trn` datset
+
+```
+train.pred=predict(fit,newdata = trn)
+
+errors=trn$Price-train.pred
+
+rmse = (errors)**2 %>% mean() %>% sqrt() #389337.2
+
+mae=mean(abs(errors)) #256483.5
+```
 
 
 
