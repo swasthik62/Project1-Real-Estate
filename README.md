@@ -210,6 +210,8 @@ rmse = (errors)**2 %>% mean() %>% sqrt() #389337.2
 
 mae=mean(abs(errors)) #256483.5
 ```
+If we take the difference of GBM `tst` and `trn` it would be 5.68973%.
+
 
 
 
