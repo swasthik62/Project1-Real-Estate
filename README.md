@@ -180,11 +180,11 @@ If we take the difference of `tst` and `trn` it would be 3.2451%.
 ```
 gbm.fit=gbm(Price~.-Type_X__other__,
             data=trn,
-            distribution = "gaussian", #if it is classification logistic
-            n.trees = 400,
+            distribution = "gaussian", 
+            n.trees = 500,
             shrinkage = 0.01,
-            bag.fraction = 0.8,
-            interaction.depth = 5) 
+            bag.fraction = 0.9,
+            interaction.depth = 3)  
 
 help("gbm")
 ```
@@ -193,29 +193,92 @@ help("gbm")
 ```
 test.predicted.gbm=predict.gbm(gbm.fit,newdata=tst)
 
-errors=test.predicted.gbm-tst$Price
+errors=tst$Price-test.predicted.gbm
 
-rmse = (errors)**2 %>% mean() %>% sqrt() #412138.1
+rmse = (errors)**2 %>% mean() %>% sqrt() #426854.8
 
-mae=mean(abs(errors)) #260450.3
+mae=mean(abs(errors)) #271378
 ```
 #### Checking the RMSE and MAE of `trn` datset
 
 ```
-train.pred=predict(fit,newdata = trn)
+train.predicted.gbm=predict.gbm(gbm.fit,newdata=trn)
 
-errors=trn$Price-train.pred
+errors=trn$Price-train.predicted.gbm
 
-rmse = (errors)**2 %>% mean() %>% sqrt() #389337.2
+rmse = (errors)**2 %>% mean() %>% sqrt() #408792.7
 
-mae=mean(abs(errors)) #256483.5
+mae=mean(abs(errors)) #271378
 ```
-If we take the difference of GBM `tst` and `trn` it would be 5.68973%.
+If we take the difference of GBM `tst` and `trn` it would be 4.3229%.
 
+#### XGBoost Model   
+In this model we are  we are seperating the target variable and dependent variable and creating x_train and y_train then we will implementing it on the model.
 
+```
+x_train=trn %>% select(-Price)
+y_train=trn$Price
+x_test=tst %>% select(-Price)
+xgb.fit=xgboost(data=data.matrix(x_train),
+                label = y_train,
+                objective='reg:linear',
+                verbose=1,
+                nrounds = 10)
+```
 
+#### Checking the RMSE and MAE of `tst` datset
+```
+test.predicted.xgb=predict(xgb.fit,data.matrix(x_test))
 
+errors=tst$Price-test.predicted.xgb
 
+rmse = (errors)**2 %>% mean() %>% sqrt() #390284
+
+mae=mean(abs(errors)) #231787.1
+```
+
+#### Checking the RMSE and MAE of `trn` datset
+```
+train.predicted.xgb=predict(xgb.fit,data.matrix(x_train))
+
+errors=trn$Price-train.predicted.xgb
+
+rmse = (errors)**2 %>% mean() %>% sqrt() #318306.2
+
+mae=mean(abs(errors)) #201579.3
+
+```
+
+### RANDOM FOREST
+
+Let`s check the model performance on RandomForest
+
+```
+rf = randomForest(Price~.,data = trn, ntree = 100,
+                  nodesize=400,
+                  maxnodes=30,
+                  do.trace=TRUE)
+```
+#### Checking the RMSE and MAE of `tst` datset
+```
+test.predicted.rf=predict(rf, newdata=tst)
+
+errors=tst$Price-test.predicted.rf
+
+rmse = (errors)**2 %>% mean() %>% sqrt() #435917.7
+
+mae=mean(abs(errors)) #273009.8
+```
+#### Checking the RMSE and MAE of `trn` datset
+```
+train.predicted.rf=predict(rf, newdata=trn)
+
+errors=trn$Price-train.predicted.rf
+
+rmse = (errors)**2 %>% mean() %>% sqrt() #418170.9
+
+mae=mean(abs(errors)) #267736.6
+```
 
 
 
