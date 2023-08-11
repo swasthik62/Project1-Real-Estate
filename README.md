@@ -213,7 +213,7 @@ mae=mean(abs(errors)) #271378
 If we take the difference of GBM `tst` and `trn` it would be 4.3229%.
 
 #### XGBoost Model   
-In this model we are  we are seperating the target variable and dependent variable and creating x_train and y_train then we will implementing it on the model.
+In this model we are  we are seperating the target variable and independent variable and creating x_train and y_train then we will implementing it on the model.
 
 ```
 x_train=trn %>% select(-Price)
@@ -284,10 +284,130 @@ If we take the difference of GBM `tst` and `trn` it would be 4.15573%
 
 once we are completed the model performance we can see Linear model, Random Forest and GBM models are doing good on this perticular dataset. So in order to bring down the RMSE and MAE  value we need to follow the CvTuning with KFold validation.
 
+### KFold Cross Validation
+Using this Tuning our model will behave stable in any given condition. Here in this Tuning it helps to create different combination of data and we are checking the stability of the dataset.
 
+In the begininga stage we are stacking with  the funtion implementation.
 
+```
+library(CvTools)
+mykfolds=function(nobs,nfold=5){
+  
+  t=cvFolds(nobs,K=nfold,type='random')
+  
+  folds=list()
+  
+  for(i in 1:nfold){
+    
+    test=t$subsets[t$which==i]
+    train=t$subsets[t$which!=i]
+    
+    folds[[i]]=list('train'=train,'test'=test)
+  }
+  
+  return(folds)
+}
 
+myfolds=mykfolds(nrow(trn),10) #here i applied the myfolds funtion on `trn` dataset
+```
+In the next stage we are creating the empty data frame with 3 columns for implimentation of 'trn' dataset.
 
+### Stack layer 2  data  for train
+```
+bd_train_layer1=data.frame(rf_var=numeric(nrow(trn)),
+                           xgb_var=numeric(nrow(trn)),
+                           gbm_var=numeric(nrow(trn)))
+```
+Now we are implementing the XGboost, GBM and RandomForest to the KFold functionof Layer 1
+```
+for(i in 1:10){
+  print(c(i))
+  fold=myfolds[[i]]
+  
+  train_data=trn[fold$train,]
+  test_data=trn[fold$test,]
+  
+  print('rf')
+  
+  rf.fit=randomForest(Price~.-Type_X__other__,data=train_data,
+                      ntree=100,mtry=10)
+  rf_score=predict(rf.fit,newdata=test_data)
+  
+  print('gbm')
+  gbm.fit=gbm(Price~.-Type_X__other__,
+              data=train_data,
+              distribution = "gaussian",
+              n.trees = 100,interaction.depth = 3)
+  
+  gbm_score=predict(gbm.fit,newdata=test_data,
+                    n.trees=100)
+  
+  
+ print('xgb')
+  x_train=trn %>% select(-Price)
+  y_train=trn$Price
+  x_test=tst %>% select(-Price)
+  xgb.fit=xgboost(data=data.matrix(x_train),
+                  label = y_train,
+                  objective='reg:linear',
+                  verbose=1,
+                  nrounds = 10)
+  xgb_score=predict(xgb.fit,data.matrix(x_test))
+  
+  
+  bd_train_layer1$rf_var[fold$test]=rf_score
+  
+  bd_train_layer1$gbm_var[fold$test]=gbm_score
+  
+  bd_train_layer1$xgb_var[fold$test]=xgb_score
+}
+```
+Once run this the iteration will get started as per our input.
+Similarly we should do the Layer 2 for 'tst' dataset
+
+### Stack layer 2  data  for test
+```
+bd_test_layer2=data.frame(rf_var=numeric(nrow(tst)),
+                          xgb_var=numeric(nrow(tst)),
+                          gbm_var=numeric(nrow(tst)))
+```
+### now we are running the model on full train data (trn)
+
+RandomForest:
+```
+full.rf=randomForest(Price~.-Type_X__other__,data=trn, 
+                     ntree=100,mtry=10)
+bd_test_layer2$rf_var=predict(full.rf,newdata=tst)
+```
+Gradient Boosting Machine:
+```
+full.gbm=gbm(Price~.-Type_X__other__,
+             data=trn,
+             distribution = "gaussian",
+             n.trees = 100,interaction.depth = 3)
+bd_test_layer2$gbm_var=predict(full.gbm,newdata=tst,
+                               n.trees=100)
+```
+XGBoost:
+```
+x_train=trn %>% select(-Price)
+y_train=trn$Price
+x_test=tst %>% select(-Price)
+xgb.fit=xgboost(data=data.matrix(x_train),
+                label = y_train,
+                objective='reg:linear',
+                verbose=1,
+                nrounds = 10)
+bd_test_layer2$xgb_var=predict(xgb.fit,data.matrix(x_test))
+```
+Linear Model:
+Now we are running Linear model on top of it to get the final output.
+
+```
+bd_train_layer1$Price=trn$Price #we are impleminting Layer 1 data set to `trn$price`
+bd_test_layer2$Price=tst$Price #we are impleminting Layer 1 data set to `tst$price`
+
+lin.model=lm(Price~.,data=bd_train_layer1) #running the Linear models on the layer 1 and implementing on layer 2
 
 
 
