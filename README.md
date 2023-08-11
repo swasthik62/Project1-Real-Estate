@@ -248,6 +248,7 @@ rmse = (errors)**2 %>% mean() %>% sqrt() #318306.2
 mae=mean(abs(errors)) #201579.3
 
 ```
+If we take the difference of GBM `tst` and `trn` it would be 20.3158%.
 
 ### RANDOM FOREST
 
@@ -279,6 +280,9 @@ rmse = (errors)**2 %>% mean() %>% sqrt() #418170.9
 
 mae=mean(abs(errors)) #267736.6
 ```
+If we take the difference of GBM `tst` and `trn` it would be 4.15573%
+
+once we are completed the model performance we can see Linear model, Random Forest and GBM models are doing good on this perticular dataset. So in order to bring down the RMSE and MAE  value we need to follow the CvTuning with KFold validation.
 
 
 
