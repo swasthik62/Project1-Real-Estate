@@ -280,7 +280,8 @@ mae=mean(abs(errors)) #267736.6
 ```
 `VarImpPlot(rf)`
 
-![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/d813151a-229b-45e7-8ccd-135d719f8560)
+![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/3d86bdeb-3cc1-4f4b-b0e4-e963cce8cec7)
+
 
 From the above output we can see The Rooms,Type U, BuildingArea, Distance having high correlation with Price.
 
