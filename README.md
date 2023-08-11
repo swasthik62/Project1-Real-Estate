@@ -10,13 +10,12 @@ houses in its market which would be as close as possible to a price where the tr
 Data regarding all possible variables and qualities of over 10,000 houses sold in the past was collected and
 analyzed.
 ## COLLECT AND IMPORTING THE DATASET: PREPARE
-Once i have collected the data from stakeholder i have received two datasets, in that one is Train which has Target and Dependent variables and another Test dataset has only Dependent variables and we should predict our Train data on this. 
-In the initial step im importing the Train and Test Dataset to the R.
+Once i have collected the data from stakeholder i have received the Dataset which has 7536 observations and 16 variables. 
+In the initial step im importing the  Dataset to the R and started to work on the Dataset.
 
 ```getwd()
 setwd("C:/edvancer/R programing/case study 1 dataset")  #Setting the working directory
 hs_train=read.csv("housing_train (4).csv",stringsAsFactors = FALSE)  #Importing the Train dataset
-hs_test=read.csv("housing_test (2).csv",stringsAsFactors = FALSE) #Importing the Test dataset
 ```
 
 ## DATA CLEAINING PROCEDURE : PROCESS
@@ -26,18 +25,10 @@ After importing the Dataset we should understand the Dataset so that we can iden
 
 ![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/03fea638-1289-464e-a8a4-688287c2e568)
 
-```view(head(hs_test))``` #Test dataset
-
-![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/591ab987-7a99-4a55-97d7-67e8acd9f6bd)
 
 ### Deal with NA values
 
 After importing the dataset we need to understand the Missing values and NA's 
-
-``` colSums(is.na(hs_test))#We have get the data of NA values accumulated in Test data ```
-
-![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/dda774ec-aa18-47b1-b802-a049e8dcdb05)
-
 
 ```colSums(is.na(hs_train))``` #We have get the data of NA values accumulated in Train data
 
@@ -49,9 +40,6 @@ We can also plot the Tables of NAs using the ```vis_dat``` function.
 
 ![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/f2d27be6-11d6-443c-aa2c-dd5964fe0108)
 
-``` vis_dat(hs_test) # to plot the test dataset ```
-
-![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/232c391a-acb6-439f-ad52-57fee10ae8bc)
 
 There are many missing values and we need to convert some Variables into Numerical values, And We need to create Dummies for certain Variables.
 
@@ -111,7 +99,6 @@ Once the ```dp_pipe``` is created we need to ```prep``` and ```bake``` the dp_pi
 ```
 dp_pipe=prep(dp_pipe)
 hs_train=bake(dp_pipe,new_data = hs_train)
-hs_test=bake(dp_pipe,new_data = hs_test)
 ```
 After the recipe funtion there will be no Na or missing values and also there will additional variables were added due to the Create Dummy funtion. Lets check the dataset.
 
@@ -173,7 +160,10 @@ rmse = (errors)**2 %>% mean() %>% sqrt() #417847.7
 
 mae=mean(abs(errors)) #283665.2
 ```
-If we take the difference of `tst` and `trn` it would be 3.2451%.
+We can observe that the Residual standard error: 418900 on 5998 degrees of freedom
+And the Multiple R-squared  0.5997 $  Adjusted R-squared:  0.5977.
+RMSE: 431630.9
+MAE: 283665.2
 
 #### Gradient Boosting Machine
 
@@ -210,7 +200,14 @@ rmse = (errors)**2 %>% mean() %>% sqrt() #408792.7
 
 mae=mean(abs(errors)) #271378
 ```
-If we take the difference of GBM `tst` and `trn` it would be 4.3229%.
+`summary(gbm.fit)`
+
+![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/c14a2fe3-5bd1-4235-a482-a216b8533dde)
+
+We can see the Rooms and u-type of the properties are having High Relative Influence
+
+RMSE: 426854.8
+MAE: 271378
 
 #### XGBoost Model   
 In this model we are  we are seperating the target variable and independent variable and creating x_train and y_train then we will implementing it on the model.
@@ -248,7 +245,8 @@ rmse = (errors)**2 %>% mean() %>% sqrt() #318306.2
 mae=mean(abs(errors)) #201579.3
 
 ```
-If we take the difference of GBM `tst` and `trn` it would be 20.3158%.
+RMSE: 390284
+But If we take the difference of GBM `tst` and `trn` it would be 20.3158% and there is unstability in the dataset.
 
 ### RANDOM FOREST
 
@@ -280,7 +278,14 @@ rmse = (errors)**2 %>% mean() %>% sqrt() #418170.9
 
 mae=mean(abs(errors)) #267736.6
 ```
-If we take the difference of GBM `tst` and `trn` it would be 4.15573%
+`VarImpPlot(rf)`
+
+![image](https://github.com/swasthik62/Project1-Real-Estate/assets/125183564/d813151a-229b-45e7-8ccd-135d719f8560)
+
+From the above output we can see The Rooms,Type U, BuildingArea, Distance having high correlation with Price.
+
+RMSE: 435917.7
+MAE: 273009.8
 
 once we are completed the model performance we can see Linear model, Random Forest and GBM models are doing good on this perticular dataset. So in order to bring down the RMSE and MAE  value we need to follow the CvTuning with KFold validation.
 
@@ -408,7 +413,42 @@ bd_train_layer1$Price=trn$Price #we are impleminting Layer 1 data set to `trn$pr
 bd_test_layer2$Price=tst$Price #we are impleminting Layer 1 data set to `tst$price`
 
 lin.model=lm(Price~.,data=bd_train_layer1) #running the Linear models on the layer 1 and implementing on layer 2
+```
+### Checking the RMSE and MAE of `tst` datset of layer2
+```
+test.predicted.l2=predict(lin.model,newdata = bd_test_layer2)
 
+errors=bd_test_layer2$Price-test.predicted.l2
+
+rmse = (errors)**2 %>% mean() %>% sqrt() #356692.6
+
+mae=mean(abs(errors)) #210985
+```
+### Checking the RMSE and MAE of `trn` datset of layer1 
+```
+train.predicted.l1=predict(lin.model,newdata = bd_train_layer1)
+
+errors=bd_train_layer1$Price-train.predicted.l1
+
+rmse = (errors)**2 %>% mean() %>% sqrt() #346279.4
+
+mae=mean(abs(errors)) #211363
+```
+`summary(lin.model)`
+
+We can observe that the Residual standard error: 346400 on 6024 degrees of freedom
+Multiple R-squared:  0.7251,	Adjusted R-squared:  0.7249 
+RMSE: 356692.6
+MAE: 210985
+We can observe that the after KFold cross validation our test and train data's are performed very well on these models and there is observable results in the RMSE and R-Square values. 
+
+## Data observation : Analyze and Share the data
+Standard error: we can cledarly see that there is a considerable difference in the standard error as in the initial stage the SE was 418900 on 5998 degrees of freedom and after the Iternation this bring down to the value of 346400 on 6024 degrees of freedom which is a quite good result.
+R squared error: Similarly we can see the R-Squared error also giving a decent result. Before the iteration the R-Squared error was 0.5997 and once the proper iteration is done the value bring up to the 0.7249 which is decent value.
+
+## Solution statement: Act
+Created a predictive model using linear regression and implemented CvTuning with the help of
+Random forest and GBM and XGBoost to arrive at a potential transaction price for all future transactions. As per the Data Anlaysis Over the next 6 months, negotiation time was brought down from 27 days on average to 8 days which is almost a save the 3 weeks for the real estate agents. and the percentage of the Deal closure went up by 19%.  
 
 
 
