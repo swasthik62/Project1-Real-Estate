@@ -13,6 +13,20 @@ analyzed.
 Once i have collected the data from stakeholder i have received the Dataset which has 7536 observations and 16 variables. 
 In the initial step im importing the  Dataset to the R and started to work on the Dataset.
 
+**Importing the Libraries**
+```
+library(vif)
+library(tidymodels)
+library(tidyverse)
+library(ggplot2)
+library(gbm)
+library(cvTools)
+library(dplyr)
+library(randomForest)
+library(car)
+library(xgboost)
+```
+
 ```getwd()
 setwd("C:/edvancer/R programing/case study 1 dataset")  #Setting the working directory
 hs_train=read.csv("housing_train (4).csv",stringsAsFactors = FALSE)  #Importing the Train dataset
